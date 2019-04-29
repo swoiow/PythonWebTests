@@ -1,0 +1,94 @@
+version: "3.5"
+
+services:
+  tornado:
+    image: python:3.6-slim
+    container_name: tornado-python
+    environment:
+      PIPMIRROR: "https://pypi.tuna.tsinghua.edu.cn/simple"
+      PYPKGS: "simplejson tornado"
+      CNPIPI: "pip install -q --no-cache-dir"
+
+    ports:
+      - 0.0.0.0:8080:8888
+    volumes:
+      - $PWD:/tmp
+    working_dir: /tmp
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo "依赖安装中。。。"
+        $$CNPIPI -i $$PIPMIRROR $$PYPKGS
+        echo "Running Server。。。"
+        python server/tornado.py
+
+
+  tornado-pypy:
+    image: pypy:3.6-slim
+    container_name: tornado-pypy
+    environment:
+      PIPMIRROR: "https://pypi.tuna.tsinghua.edu.cn/simple"
+      PYPKGS: "simplejson tornado"
+      CNPIPI: "pip install -q --no-cache-dir"
+
+    ports:
+      - 0.0.0.0:8080:8888
+    volumes:
+      - $PWD:/tmp
+    working_dir: /tmp
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo "依赖安装中。。。"
+        $$CNPIPI -i $$PIPMIRROR $$PYPKGS
+        echo "Running Server。。。"
+        pypy3 server/tornado.py
+
+
+  flask:
+    image: python:3.6-slim
+    container_name: flask-python
+    environment:
+      PIPMIRROR: "https://pypi.tuna.tsinghua.edu.cn/simple"
+      PYPKGS: "simplejson Flask"
+      CNPIPI: "pip install -q --no-cache-dir"
+      FLASK_APP: "server.flask.py"
+
+    ports:
+      - 0.0.0.0:8080:8888
+    volumes:
+      - $PWD:/tmp
+    working_dir: /tmp
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo "依赖安装中。。。"
+        $$CNPIPI -i $$PIPMIRROR $$PYPKGS
+        echo "Running Server。。。"
+        flask run --host=0.0.0.0 --port=8888
+
+  flask-gg:
+    image: python:3.6-slim
+    container_name: flask-gunicorn-gevent
+    environment:
+      PIPMIRROR: "https://pypi.tuna.tsinghua.edu.cn/simple"
+      PYPKGS: "simplejson Flask gunicorn gevent"
+      CNPIPI: "pip install -q --no-cache-dir"
+      FLASK_APP: "server.flask.py"
+
+    ports:
+      - 0.0.0.0:8080:8888
+    volumes:
+      - $PWD:/tmp
+    working_dir: /tmp
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo "依赖安装中。。。"
+        $$CNPIPI -i $$PIPMIRROR $$PYPKGS
+        echo "Running Server。。。"
+        gunicorn -b 0.0.0.0:8080 server.flask:app -k gevent
